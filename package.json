@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/aiyatam/SailDrone/issues"
   },
-  "homepage": "https://github.com/aiyatam/SailDrone#readme"
+  "homepage": "https://github.com/aiyatam/SailDrone#readme",
+  "dependencies": {
+    "node-bebop": "^0.6.0"
+  }
 }
