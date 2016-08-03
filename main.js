@@ -1,19 +1,7 @@
-var bebop = require('node-bebop');
+var drone = require('./util/safe-drone');
 
-var drone = bebop.createClient();
-console.log("fuck me");
+drone.connect(onConnect);
 
-drone.connect(function() {
-    console.log("fuck it's working");
-    drone.takeOff();
-
-    setTimeout(function() {
-        
-        drone.frontFlip();
-
-        setTimeout(function(){
-            drone.land();
-        }, 5000);
-
-    }, 5000);
-});
+function onConnect() {
+    
+}
