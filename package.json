@@ -22,7 +22,9 @@
     "minimist": "== 1.2.0",
     "node-bebop": "^0.6.0",
     "request": "== 2.67.0",
-    "slackbots": "^0.5.1",
-    "socket.io": "== 1.3.7"
+    "socket.io": "== 1.3.7",
+    "minimist": "== 1.2.0",
+    "concat-stream": "== 1.5.1",
+    "slackbots": "^0.5.1"
   }
 }
