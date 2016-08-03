@@ -1,11 +1,14 @@
-var bebop = require('node-bebop');
+var drone = require('./util/safe-drone');
 
-var drone = bebop.createClient();
-
-
-console.log(process.argv[2]);
 
 drone.connect(function() {
-    console.log('')
-    drone[process.argv[2]]();
+    console.log('connected!')
+    drone.on('battery', console.log);
 });
+
+// console.log(process.argv[2]);
+
+// drone.connect(function() {
+//     console.log('connected!')
+//     drone[process.argv[2]]();
+// });
