@@ -8,6 +8,12 @@ drone.connect(function() {
     drone.takeOff();
 
     setTimeout(function() {
-        drone.land();
+        
+        drone.frontFlip();
+
+        setTimeout(function(){
+            drone.land();
+        }, 5000);
+
     }, 5000);
 });
