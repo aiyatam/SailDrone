@@ -1,4 +1,5 @@
-var SlackBot = require('slackbots');
+var SlackBot = require('slackbots'),
+    drone = require('./util/safe-drone');
 
 // create a Bot
 var settings = {
@@ -10,20 +11,35 @@ var params = {
     icon_emoji: ':battery:'
 };
 
-var bot = new SlackBot(settings);
+var bot = new SlackBot(settings),
+    droneState = { connected: false, battery: 100 };
 
 bot.on('start', function() {
-    // bot.postMessageToChannel('some-channel-name', 'Hello channel!');
-    // bot.postMessageToUser('some-username', 'yo bro!');
-    // bot.postMessageToGroup('saildrone', 'yo whats good?');
+    drone.connect(function () {
+        console.log('Connected to drone');
+        droneState.connected = true;
+    });
 
-    // bot.postMessageToChannel('general', 'test!', params);
-    // bot.postMessageToGroup('sail-drone', 'testing...', params);
+    drone.on('battery', function(percentage) {
+        droneState.battery = percentage;
+    });
 });
 
 bot.on('message', function(data) {
-    if (data.text && data.text.includes('hello')) {
-        bot.postMessageToGroup('sail-drone', 'hey hows it going?', params);
+    var text = data.text;
+    if (text && text.includes('@saildrone')) {
+        if (!droneState.connected) {
+            bot.postMessageToGroup('sail-drone', 'I\'m not connected, Cyberdine SkyNet is not alive', params);
+        }
+
+        else {
+            if (text.includes('battery')) {
+                bot.postMessageToGroup('sail-drone', droneState.battery + '%', params);
+            }
+            else {
+                bot.postMessageToGroup('sail-drone', 'I don\'t understand', params);
+            }
+        }
     }
     console.log(data);
 });

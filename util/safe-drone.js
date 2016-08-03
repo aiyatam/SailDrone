@@ -12,6 +12,7 @@ var client = {
             console.error('Dumping real drone methods:\n********* (HOW TF is e.g. "takeOff" missing????)\n');
             console.error(_.keys(realDrone).join(', '), '\n');
             realDrone.on('battery', _.bind(console.error, console, 'Battery:', _, '%'));
+            callback.apply(client, arguments);
         });
     }
 }
