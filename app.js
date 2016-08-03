@@ -3,16 +3,16 @@ var argv = require('minimist')(process.argv.slice(1));
 if (argv.dev) {
     console.error('Running in dev mode, starting apps on brocalbrost...');
 
-    // var saildroneServer = require('./saildroneServer.js'),
-    //     missionControl = require('./missionControl.js');
+    var saildroneServer = require('./saildroneServer.js'),
+         missionControl = require('./missionControl.js');
 
-    // saildroneServer.serve();
-    // missionControl.serve();
-    serveLocalSailbot();
+    saildroneServer.serve();
+    missionControl.run();
+    serveLocalSailbot();    
 }
 
 
-// ganked from sailbot repo
+// copy pasta ganked from sailbot repo
 function serveLocalSailbot() {
     var express = require('express');
     var bodyParser = require('body-parser');
