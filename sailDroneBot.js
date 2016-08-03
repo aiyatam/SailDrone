@@ -4,7 +4,11 @@ var SlackBot = require('slackbots');
 var settings = {
     // token: 'xoxb-65991074277-cpD1VAjrJan9J8UBCOOLGNIj',
     token: process.env.HACK_BOT_API_TOKEN,
-    name: 'saildrone'
+    name: 'sail-drone'
+};
+
+var params = {
+    icon_emoji: ':battery:'
 };
 
 var bot = new SlackBot(settings);
@@ -14,10 +18,13 @@ bot.on('start', function() {
     // bot.postMessageToUser('some-username', 'yo bro!');
     // bot.postMessageToGroup('saildrone', 'yo whats good?');
 
-    var params = {
-        icon_emoji: ':battery:'
-    };
-
     // bot.postMessageToChannel('general', 'test!', params);
-    bot.postMessageToGroup('sail-drone', 'How may I be of service?', params);
+    // bot.postMessageToGroup('sail-drone', 'testing...', params);
+});
+
+bot.on('message', function(data) {
+    if (data.text && data.text.includes('hello')) {
+        bot.postMessageToGroup('sail-drone', 'hey hows it going?', params);
+    }
+    console.log(data);
 });
