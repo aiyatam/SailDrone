@@ -18,6 +18,10 @@
   "homepage": "https://github.com/aiyatam/SailDrone#readme",
   "dependencies": {
     "node-bebop": "^0.6.0",
-    "lodash": "4.14.1"
+    "lodash": "== 4.14.1",
+    "express": "== 4.13.4",
+    "request": "== 2.67.0",
+    "socket.io": "== 1.3.7",
+    "minimist": "== 1.2.0"
   }
 }
