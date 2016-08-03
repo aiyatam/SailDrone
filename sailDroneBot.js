@@ -2,7 +2,6 @@ var SlackBot = require('slackbots');
 
 // create a Bot
 var settings = {
-    // token: 'xoxb-65991074277-cpD1VAjrJan9J8UBCOOLGNIj',
     token: process.env.HACK_BOT_API_TOKEN,
     name: 'sail-drone'
 };
