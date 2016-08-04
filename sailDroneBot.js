@@ -34,6 +34,58 @@ bot.on('start', function() {
 var DRONE_COMMANDS = {
     battery: function() {
         bot.postMessageToGroup('sail-drone', droneState.battery + '%', params);
+    },
+    takepicture: function() {
+        drone.takePicture();
+        bot.postMessageToGroup('sail-drone', 'I just took a picture', params);
+    },
+    startrecording: function() {
+        drone.startRecording();
+        bot.postMessageToGroup('sail-drone', 'I started recording...', params);
+    },
+    stoprecording: function() {
+        drone.stopRecording();
+        bot.postMessageToGroup('sail-drone', 'I stopped recording...', params);
+    },
+    takeoff: function() {
+        drone.takeOff(function() {
+            bot.postMessageToGroup('sail-drone', 'I am now airborne', params);
+        });
+    },
+    land: function() {
+        drone.land(function() {
+            bot.postMessageToGroup('sail-drone', 'I am on the ground', params);
+        });
+    },
+    stop: function() {
+        drone.stop();
+        bot.postMessageToGroup('sail-drone', 'I am hovering in place', params);
+    },
+    emergency: function() {
+        drone.emergency();
+        bot.postMessageToGroup('sail-drone', 'Emergency stop executed!', params);
+    },
+    frontflip: function() {
+        drone.frontFlip();
+        bot.postMessageToGroup('sail-drone', 'I did a front flip', params);
+    },
+    backflip: function() {
+        drone.backflip();
+        bot.postMessageToGroup('sail-drone', 'I did a back flip', params);
+    },
+    rightflip: function() {
+        drone.rightFlip();
+        bot.postMessageToGroup('sail-drone', 'I did a right flip', params);
+    },
+    leftflip: function() {
+        drone.leftFlip();
+        bot.postMessageToGroup('sail-drone', 'I did a left flip', params);
+    },
+    clockwise: function(val) {
+        drone.clockwise(val);
+    },
+    counterClockwise: function(val) {
+        drone.counterClockwise(val);
     }
 };
 
