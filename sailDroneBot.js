@@ -11,6 +11,8 @@ var realDrone = safeDrone.______REAL_DRONE;
 var fs = require('fs');
 var path = require('path');
 
+var channelName = 'sail-drone';
+
 // create a Bot
 var settings = {
     token: process.env.HACK_BOT_API_TOKEN,
@@ -31,54 +33,54 @@ var DRONE_COMMANDS = {
         var params = {
             icon_emoji: ':battery:'
         };
-        slackBot.postMessageToGroup('sail-drone', droneState.battery + '%', params);
+        slackBot.postMessageToGroup(channelName, droneState.battery + '%', params);
     },
     // TODO this doesn't work
     // takepicture: function() {
     //     realDrone.takePicture();
-    //     slackBot.postMessageToGroup('sail-drone', 'I just took a picture', params);
+    //     slackBot.postMessageToGroup(channelName, 'I just took a picture', params);
     // },
     startrecording: function() {
         realDrone.startRecording();
-        slackBot.postMessageToGroup('sail-drone', 'I started recording...', params);
+        slackBot.postMessageToGroup(channelName, 'I started recording...', params);
     },
     stoprecording: function() {
         realDrone.stopRecording();
-        slackBot.postMessageToGroup('sail-drone', 'I stopped recording...', params);
+        slackBot.postMessageToGroup(channelName, 'I stopped recording...', params);
     },
     takeoff: function() {
         realDrone.takeOff(function() {
-            slackBot.postMessageToGroup('sail-drone', 'I am now airborne', params);
+            slackBot.postMessageToGroup(channelName, 'I am now airborne', params);
         });
     },
     land: function() {
         realDrone.land(function() {
-            slackBot.postMessageToGroup('sail-drone', 'I am on the ground', params);
+            slackBot.postMessageToGroup(channelName, 'I am on the ground', params);
         });
     },
     stop: function() {
         realDrone.stop();
-        slackBot.postMessageToGroup('sail-drone', 'I am hovering in place', params);
+        slackBot.postMessageToGroup(channelName, 'I am hovering in place', params);
     },
     emergency: function() {
         realDrone.emergency();
-        slackBot.postMessageToGroup('sail-drone', 'Emergency stop executed!', params);
+        slackBot.postMessageToGroup(channelName, 'Emergency stop executed!', params);
     },
     frontflip: function() {
         realDrone.frontFlip();
-        slackBot.postMessageToGroup('sail-drone', 'I did a front flip', params);
+        slackBot.postMessageToGroup(channelName, 'I did a front flip', params);
     },
     backflip: function() {
         realDrone.backflip();
-        slackBot.postMessageToGroup('sail-drone', 'I did a back flip', params);
+        slackBot.postMessageToGroup(channelName, 'I did a back flip', params);
     },
     rightflip: function() {
         realDrone.rightFlip();
-        slackBot.postMessageToGroup('sail-drone', 'I did a right flip', params);
+        slackBot.postMessageToGroup(channelName, 'I did a right flip', params);
     },
     leftflip: function() {
         realDrone.leftFlip();
-        slackBot.postMessageToGroup('sail-drone', 'I did a left flip', params);
+        slackBot.postMessageToGroup(channelName, 'I did a left flip', params);
     },
     getvideostream: function() {
         // Test Frigging video
@@ -89,11 +91,11 @@ var DRONE_COMMANDS = {
 
         if (droneState.connected) {
             realDrone.MediaStreaming.videoEnable(1);
-            slackBot.postMessageToGroup('sail-drone', 'video now streaming', params);
+            slackBot.postMessageToGroup(channelName, 'video now streaming', params);
         } else {
             realDrone.connect(function() {
                 realDrone.MediaStreaming.videoEnable(1);
-                slackBot.postMessageToGroup('sail-drone', 'video now streaming...', params);
+                slackBot.postMessageToGroup(channelName, 'video now streaming...', params);
             });
         }
     },
@@ -105,19 +107,19 @@ var DRONE_COMMANDS = {
 
 var OTHER_COMMANDS = {
     hello: function() {
-        slackBot.postMessageToGroup('sail-drone', 'Hey whats up?', params);
+        slackBot.postMessageToGroup(channelName, 'Hey whats up?', params);
     },
     onduty: function() {
         var params = {
             icon_emoji: ':george:'
         };
-        slackBot.postMessageToGroup('sail-drone', ':george:', params);
+        slackBot.postMessageToGroup(channelName, ':george:', params);
     },
     george: function() {
         var params = {
             icon_emoji: ':george:'
         };
-        slackBot.postMessageToGroup('sail-drone', 'I :heart: :sail-drone:Saildrone:sail-drone:!!!', params);
+        slackBot.postMessageToGroup(channelName, 'I :heart: :sail-drone:Saildrone:sail-drone:!!!', params);
     },
     uploadapic: function(fileName, title, comment) {
         var filePath = 'SailDrone/';
@@ -134,7 +136,7 @@ var OTHER_COMMANDS = {
             filetype: 'auto',
             title: title || 'Sail Drone',
             initialComment: comment || 'Wow!',
-            channels: 'sail-drone'
+            channels: channelName
         }, function(err) {
             if (err) {
                 console.error(err);
@@ -145,14 +147,14 @@ var OTHER_COMMANDS = {
         });
     },
     test: function() {
-        slackBot.postMessageToGroup('sail-drone', 'current drone state: ' + JSON.stringify(droneState), params);
+        slackBot.postMessageToGroup(channelName, 'current drone state: ' + JSON.stringify(droneState), params);
     }
 };
 
 // Initialize
 slackBot.on('start', function() {
     console.log('Sailbot Online');
-    slackBot.postMessageToGroup('sail-drone', 'Sailbot Online', params);
+    slackBot.postMessageToGroup(channelName, 'Sailbot Online', params);
     connectToDrone();
     OTHER_COMMANDS.test();
     console.log('Current Drone State: ' + JSON.stringify(droneState));
@@ -178,7 +180,7 @@ slackBot.on('message', function(data) {
         if (DRONE_COMMANDS.hasOwnProperty(command)) {
 
             if (!droneState.connected) {
-                slackBot.postMessageToGroup('sail-drone', 'I\'m not connected. Cyberdine SkyNet is not alive.', params);
+                slackBot.postMessageToGroup(channelName, 'I\'m not connected. Cyberdine SkyNet is not alive.', params);
             } else {
                 DRONE_COMMANDS[command](additionalOptions);
             }
@@ -187,7 +189,7 @@ slackBot.on('message', function(data) {
             OTHER_COMMANDS[command](additionalOptions);
 
         } else {
-            slackBot.postMessageToGroup('sail-drone', 'I don\'t understand...', params);
+            slackBot.postMessageToGroup(channelName, 'I don\'t understand...', params);
         }
     }
 });
@@ -196,14 +198,14 @@ function connectToDrone() {
     safeDrone.connect(function () {
         console.log('Connected to drone');
         droneState.connected = true;
-        slackBot.postMessageToGroup('sail-drone', 'Sailbot is now connected to Saildrone!', params);
+        slackBot.postMessageToGroup(channelName, 'Sailbot is now connected to Saildrone!', params);
         initializeController();
-        slackBot.postMessageToGroup('sail-drone', 'Saildrone Controller Initialized!', params);
+        slackBot.postMessageToGroup(channelName, 'Saildrone Controller Initialized!', params);
     });
 
     safeDrone.on('battery', function(percentage) {
         droneState.battery = percentage;
-        slackBot.postMessageToGroup('sail-drone', 'Battery: ' + percentage, params);
+        slackBot.postMessageToGroup(channelName, 'Battery: ' + percentage, params);
     });
 }
 
@@ -216,6 +218,7 @@ function initializeController() {
     var yawSpeeds = [  -50, -25, -10, -5, 0, 5, 10, 25, 50  ];
     var yawSpeedIndex = 4;
     var yawSpeed = 25, translateSpeed = 5, vertSpeed = 15;
+    var drone = realDrone;
 
     function stopEverything() {
           console.log('STOPPING EVERYTHING');
