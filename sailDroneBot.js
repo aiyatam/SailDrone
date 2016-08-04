@@ -100,8 +100,10 @@ var DRONE_COMMANDS = {
         }
     },
     takepicture: function() {
-        var child = exec('sh lastframe.sh video.h264');
-        OTHER_COMMANDS.uploadapic('video.jpg', 'Sailthru Hackdays', 'wooohoooo!');
+        slackBot.postMessageToGroup(channelName, 'taking picture...', params);
+        var child = exec('sh lastframe.sh video.h264', function() {
+            OTHER_COMMANDS.uploadapic('video.jpg', 'Sailthru Hackdays', 'wooohoooo!');
+        });
     }
 };
 
