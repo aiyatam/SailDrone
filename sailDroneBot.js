@@ -4,6 +4,7 @@ var SlackBot = require('slackbots');
 var Slack = require('node-slack-upload');
 var safeDrone = require('./util/safe-drone');
 var keypress = require('keypress');
+var exec = require('child_process').exec;
 var realDrone = safeDrone.______REAL_DRONE;
 // var NodeBebop = require("node-bebop");
 // var realDrone = NodeBebop.createClient();
@@ -32,10 +33,11 @@ var DRONE_COMMANDS = {
         };
         slackBot.postMessageToGroup('sail-drone', droneState.battery + '%', params);
     },
-    takepicture: function() {
-        realDrone.takePicture();
-        slackBot.postMessageToGroup('sail-drone', 'I just took a picture', params);
-    },
+    // TODO this doesn't work
+    // takepicture: function() {
+    //     realDrone.takePicture();
+    //     slackBot.postMessageToGroup('sail-drone', 'I just took a picture', params);
+    // },
     startrecording: function() {
         realDrone.startRecording();
         slackBot.postMessageToGroup('sail-drone', 'I started recording...', params);
@@ -94,6 +96,10 @@ var DRONE_COMMANDS = {
                 slackBot.postMessageToGroup('sail-drone', 'video now streaming...', params);
             });
         }
+    },
+    takepicture: function() {
+        var child = exec('sh lastframe.sh video.h264');
+        OTHER_COMMANDS.uploadapic('video.jpg', 'Sailthru Hackdays', 'wooohoooo!');
     }
 };
 
@@ -113,13 +119,21 @@ var OTHER_COMMANDS = {
         };
         slackBot.postMessageToGroup('sail-drone', 'I :heart: :sail-drone:Saildrone:sail-drone:!!!', params);
     },
-    uploadapic: function() {
+    uploadapic: function(fileName, title, comment) {
+        var filePath = 'SailDrone/';
+
+        if (fileName && typeof fileName === 'string') {
+            filePath += fileName;
+        } else {
+            filePath += 'drone.jpg';
+        }
+
         slack_upload.uploadFile({
-            file: fs.createReadStream(path.join(__dirname, '..', 'SailDrone/drone.jpg')),
-            filename: "drone.jpg",
+            file: fs.createReadStream(path.join(__dirname, '..', filePath)),
+            filename: fileName || 'drone.jpg',
             filetype: 'auto',
-            title: 'Sail Drone',
-            initialComment: 'Wow!',
+            title: title || 'Sail Drone',
+            initialComment: comment || 'Wow!',
             channels: 'sail-drone'
         }, function(err) {
             if (err) {
