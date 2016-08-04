@@ -41,7 +41,7 @@ slackBot.on('start', function() {
     slackBot.postMessageToGroup('sail-drone', 'Sailbot Online', params);
     connectToDrone();
     OTHER_COMMANDS.test();
-    console.log('Current Drone State: ' + droneState);
+    console.log('Current Drone State: ' + JSON.stringify(droneState));
 });
 
 // Command objects. Modify these if you want to add more commands.
@@ -97,6 +97,23 @@ var DRONE_COMMANDS = {
     leftflip: function() {
         drone.leftFlip();
         slackBot.postMessageToGroup('sail-drone', 'I did a left flip', params);
+    },
+    getvideostream: function() {
+        // Test Frigging video
+        var output = fs.createWriteStream("./video.h264");
+        var video = drone.getVideoStream();
+
+        video.pipe(output);
+
+        if (droneState.connected) {
+            drone.MediaStreaming.videoEnable(1);
+            slackBot.postMessageToGroup('sail-drone', 'video now streaming', params);
+        } else {
+            drone.connect(function() {
+                drone.MediaStreaming.videoEnable(1);
+                slackBot.postMessageToGroup('sail-drone', 'video now streaming...', params);
+            });
+        }
     }
 };
 
@@ -171,14 +188,3 @@ slackBot.on('message', function(data) {
         }
     }
 });
-
-
-// Test Frigging video
-// var output = fs.createWriteStream("./video.h264"),
-// var video = drone.getVideoStream();
-//
-// video.pipe(output);
-//
-// drone.connect(function() {
-//     drone.MediaStreaming.videoEnable(1);
-// });
