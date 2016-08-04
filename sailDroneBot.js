@@ -16,7 +16,7 @@ var channelName = 'sail-drone';
 // create a Bot
 var settings = {
     token: process.env.HACK_BOT_API_TOKEN,
-    name: 'sail-drone'
+    name: 'SailDrone'
 };
 var slack_upload = new Slack(settings.token);
 
@@ -123,7 +123,7 @@ var OTHER_COMMANDS = {
         };
         slackBot.postMessageToGroup(channelName, 'I :heart: :sail-drone:Saildrone:sail-drone:!!!', params);
     },
-    uploadapic: function(fileName, title, comment) {
+    uploadpic: function(fileName, title, comment) {
         var filePath = 'SailDrone/';
 
         if (fileName && typeof fileName === 'string') {
@@ -149,7 +149,10 @@ var OTHER_COMMANDS = {
         });
     },
     test: function() {
-        slackBot.postMessageToGroup(channelName, 'current drone state: ' + JSON.stringify(droneState), params);
+        slackBot.postMessageToGroup(channelName, 'current drone state: `' + JSON.stringify(droneState) + '`', params);
+    },
+    whereareyou: function() {
+        slackBot.postMessageToGroup(channelName, 'I am here!', params);
     }
 };
 
@@ -207,7 +210,7 @@ function connectToDrone() {
 
     safeDrone.on('battery', function(percentage) {
         droneState.battery = percentage;
-        slackBot.postMessageToGroup(channelName, 'Battery: ' + percentage, params);
+        slackBot.postMessageToGroup(channelName, 'Battery: `' + percentage + '%`', params);
     });
 }
 
