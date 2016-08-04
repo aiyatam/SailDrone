@@ -18,6 +18,7 @@ var params = {
 var bot = new SlackBot(settings),
     droneState = { connected: false, battery: 100 };
 
+// Initialize
 bot.on('start', function() {
     drone.connect(function () {
         console.log('Connected to drone');
@@ -29,24 +30,21 @@ bot.on('start', function() {
     });
 });
 
-// var path = "/Users/ekot/dev/saildrone/SailDrone/"
-bot.on('message', function(data) {
-    var text = data.text;
-    if (text && text.includes('@saildrone')) {
-        if (!droneState.connected) {
-            bot.postMessageToGroup('sail-drone', 'I\'m not connected, Cyberdine SkyNet is not alive', params);
-        }
-
-        else {
-            if (text.includes('battery')) {
-                bot.postMessageToGroup('sail-drone', droneState.battery + '%', params);
-            }
-            else {
-                bot.postMessageToGroup('sail-drone', 'I don\'t understand', params);
-            }
-        }
+// Command objects. Modify these if you want to add more commands.
+var DRONE_COMMANDS = {
+    battery: function() {
+        bot.postMessageToGroup('sail-drone', droneState.battery + '%', params);
     }
-    if (data.text && data.text.includes('upload saildrone')) {
+};
+
+var OTHER_COMMANDS = {
+    hello: function() {
+        bot.postMessageToGroup('sail-drone', 'Hey whats up?', params);
+    },
+    joke: function() {
+        bot.postMessageToGroup('sail-drone', 'Why did the chicken cross the road?', params);
+    },
+    picture: function() {
         slack_upload.uploadFile({
             file: fs.createReadStream(path.join(__dirname, '..', 'SailDrone/drone.jpg')),
             filename: "drone.jpg",
@@ -62,7 +60,34 @@ bot.on('message', function(data) {
                 console.log('done');
             }
         });
-
     }
+};
+
+// Listen for messages
+bot.on('message', function(data) {
+    var textArray;
+    var command;
+
     console.log(data);
+    textArray = data.text.split(' ');
+    console.log(textArray);
+
+    if (typeof textArray !== 'undefined' && textArray.length > 0 && textArray[0] === '@saildrone') {
+        command = textArray[1];
+
+        if (DRONE_COMMANDS.hasOwnProperty(command)) {
+
+            if (!droneState.connected) {
+                bot.postMessageToGroup('sail-drone', 'I\'m not connected. Cyberdine SkyNet is not alive.', params);
+            } else {
+                DRONE_COMMANDS[command]();
+            }
+
+        } else if (OTHER_COMMANDS.hasOwnProperty(command)) {
+            OTHER_COMMANDS[command]();
+
+        } else {
+            bot.postMessageToGroup('sail-drone', 'I don\'t understand...', params);
+        }
+    }
 });
