@@ -14,7 +14,8 @@ var client = {
             realDrone.on('battery', _.bind(console.error, console, 'Battery:', _, '%'));
             callback.apply(client, arguments);
         });
-    }
+    },
+    ______REAL_DRONE: realDrone
 }
 
 // add allowed, delegated methods
