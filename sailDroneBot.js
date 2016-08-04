@@ -83,9 +83,11 @@ var DRONE_COMMANDS = {
     },
     clockwise: function(val) {
         drone.clockwise(val);
+        bot.postMessageToGroup('sail-drone', 'I spun clockwise', params);
     },
     counterClockwise: function(val) {
         drone.counterClockwise(val);
+        bot.postMessageToGroup('sail-drone', 'I spun counter-clockwise', params);
     }
 };
 
