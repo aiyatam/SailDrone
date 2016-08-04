@@ -2,9 +2,11 @@
 
 var SlackBot = require('slackbots');
 var Slack = require('node-slack-upload');
-var drone = require('./util/safe-drone');
+var safeDrone = require('./util/safe-drone');
+var keypress = require('keypress');
+var realDrone = safeDrone.______REAL_DRONE;
 // var NodeBebop = require("node-bebop");
-// var drone = NodeBebop.createClient();
+// var realDrone = NodeBebop.createClient();
 var fs = require('fs');
 var path = require('path');
 
@@ -22,28 +24,6 @@ var params = {
 var slackBot = new SlackBot(settings);
 var droneState = { connected: false, battery: undefined };
 
-function connectToDrone() {
-    drone.connect(function () {
-        console.log('Connected to drone');
-        droneState.connected = true;
-        slackBot.postMessageToGroup('sail-drone', 'Sailbot is now connected to Saildrone!', params);
-    });
-
-    drone.on('battery', function(percentage) {
-        droneState.battery = percentage;
-        slackBot.postMessageToGroup('sail-drone', 'Battery: ' + percentage, params);
-    });
-}
-
-// Initialize
-slackBot.on('start', function() {
-    console.log('Sailbot Online');
-    slackBot.postMessageToGroup('sail-drone', 'Sailbot Online', params);
-    connectToDrone();
-    OTHER_COMMANDS.test();
-    console.log('Current Drone State: ' + JSON.stringify(droneState));
-});
-
 // Command objects. Modify these if you want to add more commands.
 var DRONE_COMMANDS = {
     battery: function() {
@@ -53,64 +33,64 @@ var DRONE_COMMANDS = {
         slackBot.postMessageToGroup('sail-drone', droneState.battery + '%', params);
     },
     takepicture: function() {
-        drone.takePicture();
+        realDrone.takePicture();
         slackBot.postMessageToGroup('sail-drone', 'I just took a picture', params);
     },
     startrecording: function() {
-        drone.startRecording();
+        realDrone.startRecording();
         slackBot.postMessageToGroup('sail-drone', 'I started recording...', params);
     },
     stoprecording: function() {
-        drone.stopRecording();
+        realDrone.stopRecording();
         slackBot.postMessageToGroup('sail-drone', 'I stopped recording...', params);
     },
     takeoff: function() {
-        drone.takeOff(function() {
+        realDrone.takeOff(function() {
             slackBot.postMessageToGroup('sail-drone', 'I am now airborne', params);
         });
     },
     land: function() {
-        drone.land(function() {
+        realDrone.land(function() {
             slackBot.postMessageToGroup('sail-drone', 'I am on the ground', params);
         });
     },
     stop: function() {
-        drone.stop();
+        realDrone.stop();
         slackBot.postMessageToGroup('sail-drone', 'I am hovering in place', params);
     },
     emergency: function() {
-        drone.emergency();
+        realDrone.emergency();
         slackBot.postMessageToGroup('sail-drone', 'Emergency stop executed!', params);
     },
     frontflip: function() {
-        drone.frontFlip();
+        realDrone.frontFlip();
         slackBot.postMessageToGroup('sail-drone', 'I did a front flip', params);
     },
     backflip: function() {
-        drone.backflip();
+        realDrone.backflip();
         slackBot.postMessageToGroup('sail-drone', 'I did a back flip', params);
     },
     rightflip: function() {
-        drone.rightFlip();
+        realDrone.rightFlip();
         slackBot.postMessageToGroup('sail-drone', 'I did a right flip', params);
     },
     leftflip: function() {
-        drone.leftFlip();
+        realDrone.leftFlip();
         slackBot.postMessageToGroup('sail-drone', 'I did a left flip', params);
     },
     getvideostream: function() {
         // Test Frigging video
         var output = fs.createWriteStream("./video.h264");
-        var video = drone.getVideoStream();
+        var video = realDrone.getVideoStream();
 
         video.pipe(output);
 
         if (droneState.connected) {
-            drone.MediaStreaming.videoEnable(1);
+            realDrone.MediaStreaming.videoEnable(1);
             slackBot.postMessageToGroup('sail-drone', 'video now streaming', params);
         } else {
-            drone.connect(function() {
-                drone.MediaStreaming.videoEnable(1);
+            realDrone.connect(function() {
+                realDrone.MediaStreaming.videoEnable(1);
                 slackBot.postMessageToGroup('sail-drone', 'video now streaming...', params);
             });
         }
@@ -155,6 +135,15 @@ var OTHER_COMMANDS = {
     }
 };
 
+// Initialize
+slackBot.on('start', function() {
+    console.log('Sailbot Online');
+    slackBot.postMessageToGroup('sail-drone', 'Sailbot Online', params);
+    connectToDrone();
+    OTHER_COMMANDS.test();
+    console.log('Current Drone State: ' + JSON.stringify(droneState));
+});
+
 // Listen for messages
 slackBot.on('message', function(data) {
     var textArray;
@@ -188,3 +177,152 @@ slackBot.on('message', function(data) {
         }
     }
 });
+
+function connectToDrone() {
+    safeDrone.connect(function () {
+        console.log('Connected to drone');
+        droneState.connected = true;
+        slackBot.postMessageToGroup('sail-drone', 'Sailbot is now connected to Saildrone!', params);
+        initializeController();
+        slackBot.postMessageToGroup('sail-drone', 'Saildrone Controller Initialized!', params);
+    });
+
+    safeDrone.on('battery', function(percentage) {
+        droneState.battery = percentage;
+        slackBot.postMessageToGroup('sail-drone', 'Battery: ' + percentage, params);
+    });
+}
+
+
+// Controller
+function initializeController() {
+    var translate = 0;
+    var yaw = 0;
+    var flying = false;
+    var yawSpeeds = [  -50, -25, -10, -5, 0, 5, 10, 25, 50  ];
+    var yawSpeedIndex = 4;
+    var yawSpeed = 25, translateSpeed = 5, vertSpeed = 15;
+
+    function stopEverything() {
+          console.log('STOPPING EVERYTHING');
+          drone.clockwise(0);
+          drone.counterClockwise(0);
+          drone.up(0);
+          drone.down(0);
+          drone.stop();
+    }
+
+    function changeYawSpeed(dir) {
+      yawSpeedIndex += dir;
+      if (yawSpeedIndex < 0) yawSpeedIndex = 0;
+      if (yawSpeedIndex >= yawSpeeds.length) yawSpeedIndex = yawSpeeds.length - 1;
+
+      var speed = yawSpeeds[yawSpeedIndex];
+      console.log("*** YAW:", speed);
+
+      if (speed < 0) {
+        drone.clockwise(0);
+        drone.counterClockwise(-speed);
+      }
+      else {
+        drone.counterClockwise(0);
+        drone.clockwise(speed);
+      }
+    }
+
+    // make `process.stdin` begin emitting "keypress" events
+    keypress(process.stdin);
+
+      // listen for the "keypress" event
+    process.stdin.on('keypress', function (ch, key) {
+      // console.log('got "keypress"', key);
+      if (key && key.ctrl && key.name == 'c') {
+        process.stdin.pause();
+      }
+
+      if (key && key.name == 'up') {
+        // console.log('up');
+        // if (translate == 0) translate = 1;
+        // else if (translate == -1) translate = 0;
+        // move();
+
+        drone.forward(translateSpeed);
+
+      }
+      if (key && key.name == 'down') {
+        // console.log('down');
+        // if (translate == 0) translate = -1;
+        // else if (translate == 1) translate = 0;
+        // move();
+
+        drone.backward(translateSpeed);
+      }
+      if (key && key.name == 'left') {
+        // console.log('left');
+        // if (yaw == 0) yaw = -1;
+        // else if (yaw == 1) yaw = 0;
+        // move();
+
+        // drone.clockwise(0);
+        // drone.counterClockwise(yawSpeed);
+        // setTimeout(function() {
+        //     drone.counterClockwise(0);
+        //     drone.clockwise(0);
+        // }, 500);
+
+        changeYawSpeed(-1);
+
+      }
+      if (key && key.name == 'right') {
+        // console.log('right');
+        // if (yaw == 0) yaw = 1;
+        // else if (yaw == -1) yaw = 0;
+        // move();
+
+        // drone.counterClockwise(0);
+        // drone.clockwise(yawSpeed);
+        // setTimeout(function() {
+        //     drone.counterClockwise(0);
+        //     drone.clockwise(0);
+        // }, 500);
+
+        changeYawSpeed(1);
+      }
+
+      if (key && key.name == 't') {
+        console.log('takeOff');
+        drone.takeOff();
+      }
+      if (key && key.name == 'l') {
+        console.log('land');
+        drone.land();
+      }
+
+
+      if (key && key.name == 'w') {
+        console.log('w');
+        drone.up(vertSpeed);
+        setTimeout(function() {
+            stopEverything();
+        }, 750);
+      }
+      if (key && key.name == 's') {
+        console.log('s');
+        drone.down(vertSpeed);
+        setTimeout(function() {
+           stopEverything();
+        }, 750);
+      }
+
+      if (key && key.name == 'space') {
+         console.log('space, stop');
+         stopEverything();
+      }
+
+    });
+
+      process.stdin.setRawMode(true);
+      process.stdin.resume();
+
+      console.log('Controller initialized');
+}
